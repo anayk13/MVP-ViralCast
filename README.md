@@ -4,6 +4,10 @@
 
 **ViralCast** is a complete YouTube video success prediction platform that helps content creators optimize their videos for maximum reach and engagement. This package contains everything needed to build a production-ready web application.
 
+## ✅ **IMPORTANT: WORKING MODELS INCLUDED**
+
+**All ML models in this package are CLEAN and WORKING** - they have been retrained without data leakage and are ready for production use. Test them with `python test_clean_models.py` to verify functionality.
+
 ---
 
 ## 🎯 **WHAT THE WEBSITE DOES**
