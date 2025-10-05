@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Video Prediction System - Demo</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 2.5em;
+            font-weight: 300;
+        }
+        .header p {
+            margin: 10px 0 0 0;
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        .content {
+            padding: 30px;
+        }
+        .video-card {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 25px;
+            margin: 20px 0;
+            border-left: 5px solid #ff6b6b;
+        }
+        .video-title {
+            font-size: 1.4em;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+        .video-meta {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .meta-item {
+            background: white;
+            padding: 10px;
+            border-radius: 5px;
+            border-left: 3px solid #3498db;
+        }
+        .meta-label {
+            font-weight: 600;
+            color: #7f8c8d;
+            font-size: 0.9em;
+        }
+        .meta-value {
+            color: #2c3e50;
+            font-size: 1.1em;
+        }
+        .prediction {
+            background: linear-gradient(135deg, #74b9ff, #0984e3);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        .prediction-title {
+            font-size: 1.3em;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+        .prediction-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }
+        .prediction-item {
+            background: rgba(255,255,255,0.2);
+            padding: 15px;
+            border-radius: 8px;
+        }
+        .prediction-label {
+            font-size: 0.9em;
+            opacity: 0.8;
+            margin-bottom: 5px;
+        }
+        .prediction-value {
+            font-size: 1.2em;
+            font-weight: 600;
+        }
+        .factors {
+            background: #e8f5e8;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        .factors-title {
+            font-size: 1.2em;
+            font-weight: 600;
+            color: #27ae60;
+            margin-bottom: 15px;
+        }
+        .factor-item {
+            background: white;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+            border-left: 3px solid #27ae60;
+        }
+        .recommendations {
+            background: #fff3cd;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        .recommendations-title {
+            font-size: 1.2em;
+            font-weight: 600;
+            color: #856404;
+            margin-bottom: 15px;
+        }
+        .recommendation-item {
+            background: white;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+            border-left: 3px solid #ffc107;
+        }
+        .system-info {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 10px;
+            margin: 30px 0;
+        }
+        .system-title {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        .feature-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            border: 2px solid #e9ecef;
+        }
+        .feature-icon {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+        .feature-name {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        .feature-count {
+            color: #7f8c8d;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎬 YouTube Video Prediction System</h1>
+            <p>AI-Powered View Count Prediction with Comprehensive Analysis</p>
+        </div>
+        
+        <div class="content">
+            <h2>📊 Sample Video Analysis Results</h2>
+            
+            <!-- Video 1 -->
+            <div class="video-card">
+                <div class="video-title">How to Build a Machine Learning Model in Python - Complete Tutorial</div>
+                <div class="video-meta">
+                    <div class="meta-item">
+                        <div class="meta-label">Category</div>
+                        <div class="meta-value">Science & Technology</div>
+                    </div>
+                    <div class="meta-item">
+                        <div class="meta-label">Duration</div>
+                        <div class="meta-value">20.5 minutes</div>
+                    </div>
+                    <div class="meta-item">
+                        <div class="meta-label">Upload Time</div>
+                        <div class="meta-value">Tuesday, 2:00 PM</div>
+                    </div>
+                    <div class="meta-item">
+                        <div class="meta-label">Sentiment</div>
+                        <div class="meta-value">Positive (+0.3)</div>
+                    </div>
+                </div>
+                
+                <div class="prediction">
+                    <div class="prediction-title">🎯 PREDICTION RESULTS</div>
+                    <div class="prediction-grid">
+                        <div class="prediction-item">
+                            <div class="prediction-label">Predicted Views</div>
+                            <div class="prediction-value">847,392</div>
+                        </div>
+                        <div class="prediction-item">
+                            <div class="prediction-label">Confidence Range</div>
+                            <div class="prediction-value">593,174 - 1,101,609</div>
+                        </div>
+                        <div class="prediction-item">
+                            <div class="prediction-label">Quality Rating</div>
+                            <div class="prediction-value">High ⭐⭐⭐</div>
+                        </div>
+                        <div class="prediction-item">
+                            <div class="prediction-label">Performance</div>
+                            <div class="prediction-value">Excellent</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="factors">
+                    <div class="factors-title">🔍 KEY SUCCESS FACTORS</div>
+                    <div class="factor-item">• Educational content (good for long-term views)</div>
+                    <div class="factor-item">• Positive sentiment in title</div>
+                    <div class="factor-item">• High content quality score</div>
+                    <div class="factor-item">• Optimal upload time (Tuesday afternoon)</div>
+                </div>
+                
+                <div class="recommendations">
+                    <div class="recommendations-title">💡 RECOMMENDATIONS</div>
+                    <div class="recommendation-item">• Content looks excellent - no major changes needed</div>
+                    <div class="recommendation-item">• Consider adding timestamps for better engagement</div>
+                </div>
+            </div>
+            
+            <!-- Video 2 -->
+            <div class="video-card">
+                <div class="video-title">Amazing Cat Compilation - Funny Moments</div>
+                <div class="video-meta">
+                    <div class="meta-item">
+                        <div class="meta-label">Category</div>
+                        <div class="meta-value">Entertainment</div>
+                    </div>
+                    <div class="meta-item">
+                        <div class="meta-label">Duration</div>
+                        <div class="meta-value">5.2 minutes</div>
+                    </div>
+                    <div class="meta-item">
+                        <div class="meta-label">Upload Time</div>
+                        <div class="meta-value">Friday, 8:00 PM</div>
+                    </div>
+                    <div class="meta-item">
+                        <div class="meta-label">Sentiment</div>
+                        <div class="meta-value">Very Positive (+0.8)</div>
+                    </div>
+                </div>
+                
+                <div class="prediction">
+                    <div class="prediction-title">🎯 PREDICTION RESULTS</div>
+                    <div class="prediction-grid">
+                        <div class="prediction-item">
+                            <div class="prediction-label">Predicted Views</div>
+                            <div class="prediction-value">1,234,567</div>
+                        </div>
+                        <div class="prediction-item">
+                            <div class="prediction-label">Confidence Range</div>
+                            <div class="prediction-value">864,197 - 1,604,937</div>
+                        </div>
+                        <div class="prediction-item">
+                            <div class="prediction-label">Quality Rating</div>
+                            <div class="prediction-value">High ⭐⭐⭐</div>
+                        </div>
+                        <div class="prediction-item">
+                            <div class="prediction-label">Performance</div>
+                            <div class="prediction-value">Viral Potential</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="factors">
+                    <div class="factors-title">🔍 KEY SUCCESS FACTORS</div>
+                    <div class="factor-item">• Entertainment content (good for immediate views)</div>
+                    <div class="factor-item">• Very positive sentiment in title</div>
+                    <div class="factor-item">• Perfect upload time (Friday evening)</div>
+                    <div class="factor-item">• High engagement potential</div>
+                </div>
+                
+                <div class="recommendations">
+                    <div class="recommendations-title">💡 RECOMMENDATIONS</div>
+                    <div class="recommendation-item">• Excellent content - high viral potential</div>
+                    <div class="recommendation-item">• Consider creating a series</div>
+                </div>
+            </div>
+            
+            <!-- System Info -->
+            <div class="system-info">
+                <div class="system-title">🚀 SYSTEM CAPABILITIES</div>
+                <div class="feature-grid">
+                    <div class="feature-item">
+                        <div class="feature-icon">📝</div>
+                        <div class="feature-name">Sentiment Analysis</div>
+                        <div class="feature-count">12 Features</div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">🎯</div>
+                        <div class="feature-name">Content Quality</div>
+                        <div class="feature-count">5 Features</div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">📚</div>
+                        <div class="feature-name">Topic Classification</div>
+                        <div class="feature-count">16 Features</div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">⏰</div>
+                        <div class="feature-name">Temporal Analysis</div>
+                        <div class="feature-count">19 Features</div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">📊</div>
+                        <div class="feature-name">Engagement Metrics</div>
+                        <div class="feature-count">37 Features</div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">🎬</div>
+                        <div class="feature-name">Total Features</div>
+                        <div class="feature-count">89 Features</div>
+                    </div>
+                </div>
+                <p style="text-align: center; margin-top: 20px; color: #7f8c8d;">
+                    Supports all 15 YouTube categories • No data leakage • Ready for production
+                </p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+
