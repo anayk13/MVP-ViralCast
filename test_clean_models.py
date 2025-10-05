@@ -142,6 +142,166 @@ def predict_views(models, scaler, feature_names, model_info, video_data):
     
     return predictions
 
+def generate_detailed_success_factors(video_data, predictions, best_prediction):
+    """Generate comprehensive success factors and recommendations"""
+    
+    factors = {
+        "Content Optimization": [],
+        "Timing & Strategy": [],
+        "Engagement Potential": [],
+        "SEO & Discoverability": [],
+        "Performance Insights": [],
+        "Improvement Recommendations": []
+    }
+    
+    # Extract video metrics
+    title_length = len(video_data['title'])
+    description_length = len(video_data['description'])
+    tags_count = len(video_data['tags'].split(',')) if video_data['tags'] else 0
+    duration_minutes = video_data['duration'] / 60
+    like_count = video_data['like_count']
+    dislike_count = video_data['dislike_count']
+    like_ratio = like_count / (like_count + dislike_count + 1)
+    engagement_rate = (like_count + dislike_count) / 1000
+    
+    upload_date = datetime.strptime(video_data['upload_date'], '%Y-%m-%d')
+    upload_hour = upload_date.hour
+    upload_day_of_week = upload_date.weekday()
+    is_weekend = upload_day_of_week >= 5
+    
+    # Content Optimization
+    if 10 <= duration_minutes <= 20:
+        factors["Content Optimization"].append("✅ Optimal duration (10-20 min) - perfect for most content types")
+    elif duration_minutes < 5:
+        factors["Content Optimization"].append("⚠️ Short duration - consider adding more value or making it part of a series")
+    elif duration_minutes > 30:
+        factors["Content Optimization"].append("⚠️ Long duration - ensure high engagement throughout to maintain retention")
+    else:
+        factors["Content Optimization"].append("✅ Good duration range for your content type")
+    
+    if title_length > 40:
+        factors["Content Optimization"].append("✅ Strong title length - good for SEO and click-through")
+    elif title_length < 20:
+        factors["Content Optimization"].append("⚠️ Short title - consider adding more descriptive keywords")
+    else:
+        factors["Content Optimization"].append("✅ Adequate title length")
+    
+    if description_length > 100:
+        factors["Content Optimization"].append("✅ Detailed description - excellent for SEO and viewer understanding")
+    elif description_length > 50:
+        factors["Content Optimization"].append("✅ Good description length - provides context")
+    else:
+        factors["Content Optimization"].append("⚠️ Short description - consider adding more details about content")
+    
+    # Timing & Strategy
+    if 14 <= upload_hour <= 18:
+        factors["Timing & Strategy"].append("✅ Prime upload time (2-6 PM) - optimal for engagement")
+    elif 19 <= upload_hour <= 22:
+        factors["Timing & Strategy"].append("✅ Evening upload time - good for after-work viewing")
+    elif 9 <= upload_hour <= 13:
+        factors["Timing & Strategy"].append("✅ Morning upload time - good for early viewers")
+    else:
+        factors["Timing & Strategy"].append("⚠️ Off-peak upload time - consider uploading during 2-6 PM for better reach")
+    
+    if is_weekend:
+        factors["Timing & Strategy"].append("✅ Weekend upload - good for leisure viewing and binge-watching")
+    else:
+        factors["Timing & Strategy"].append("✅ Weekday upload - good for regular content schedule")
+    
+    # Engagement Potential
+    if like_ratio > 0.9:
+        factors["Engagement Potential"].append("✅ Excellent like ratio - very positive reception expected")
+    elif like_ratio > 0.8:
+        factors["Engagement Potential"].append("✅ High like ratio - strong positive engagement")
+    elif like_ratio > 0.7:
+        factors["Engagement Potential"].append("✅ Good like ratio - positive reception")
+    elif like_ratio > 0.5:
+        factors["Engagement Potential"].append("⚠️ Moderate like ratio - mixed reception expected")
+    else:
+        factors["Engagement Potential"].append("⚠️ Low like ratio - may need content adjustment")
+    
+    if engagement_rate > 10:
+        factors["Engagement Potential"].append("✅ High engagement rate - strong viewer interaction expected")
+    elif engagement_rate > 5:
+        factors["Engagement Potential"].append("✅ Good engagement rate - decent viewer interaction")
+    else:
+        factors["Engagement Potential"].append("⚠️ Low engagement rate - consider improving content appeal")
+    
+    # SEO & Discoverability
+    if tags_count > 10:
+        factors["SEO & Discoverability"].append("✅ Excellent tag coverage - great for discoverability")
+    elif tags_count > 5:
+        factors["SEO & Discoverability"].append("✅ Good tag coverage - helps with search visibility")
+    elif tags_count > 2:
+        factors["SEO & Discoverability"].append("⚠️ Moderate tag coverage - consider adding more relevant tags")
+    else:
+        factors["SEO & Discoverability"].append("⚠️ Low tag coverage - add more tags for better discoverability")
+    
+    # Check for keywords in title
+    title_lower = video_data['title'].lower()
+    if any(word in title_lower for word in ['tutorial', 'how to', 'guide', 'learn']):
+        factors["SEO & Discoverability"].append("✅ Educational keywords in title - great for long-term views")
+    if any(word in title_lower for word in ['review', 'test', 'unboxing']):
+        factors["SEO & Discoverability"].append("✅ Review keywords in title - high engagement potential")
+    if any(word in title_lower for word in ['2024', 'new', 'latest']):
+        factors["SEO & Discoverability"].append("✅ Trending keywords in title - good for current relevance")
+    
+    # Performance Insights
+    if best_prediction > 50000:
+        factors["Performance Insights"].append("🚀 HIGH VIRAL POTENTIAL - This could be a breakout video!")
+    elif best_prediction > 20000:
+        factors["Performance Insights"].append("📈 STRONG PERFORMANCE - Expected to perform very well")
+    elif best_prediction > 10000:
+        factors["Performance Insights"].append("✅ GOOD PERFORMANCE - Solid view count expected")
+    elif best_prediction > 5000:
+        factors["Performance Insights"].append("📊 MODERATE PERFORMANCE - Decent view count expected")
+    else:
+        factors["Performance Insights"].append("⚠️ LOW PERFORMANCE - May need optimization")
+    
+    # Model agreement analysis
+    pred_values = list(predictions.values())
+    pred_std = np.std(pred_values)
+    pred_mean = np.mean(pred_values)
+    cv = pred_std / pred_mean if pred_mean > 0 else 0
+    
+    if cv < 0.1:
+        factors["Performance Insights"].append("✅ High model agreement - prediction is very reliable")
+    elif cv < 0.2:
+        factors["Performance Insights"].append("✅ Good model agreement - prediction is reliable")
+    else:
+        factors["Performance Insights"].append("⚠️ Mixed model predictions - consider multiple scenarios")
+    
+    # Improvement Recommendations
+    if duration_minutes < 10:
+        factors["Improvement Recommendations"].append("💡 Consider extending content to 10-15 minutes for better retention")
+    elif duration_minutes > 25:
+        factors["Improvement Recommendations"].append("💡 Consider breaking into shorter segments or series")
+    
+    if title_length < 30:
+        factors["Improvement Recommendations"].append("💡 Add more descriptive keywords to title for better SEO")
+    
+    if description_length < 100:
+        factors["Improvement Recommendations"].append("💡 Expand description with timestamps, key points, and call-to-action")
+    
+    if tags_count < 8:
+        factors["Improvement Recommendations"].append("💡 Add more relevant tags (aim for 8-15 tags)")
+    
+    if not is_weekend and upload_hour < 14:
+        factors["Improvement Recommendations"].append("💡 Consider uploading between 2-6 PM on weekdays for better reach")
+    
+    if like_ratio < 0.8:
+        factors["Improvement Recommendations"].append("💡 Focus on creating more engaging, valuable content")
+    
+    # Content type specific recommendations
+    if 'tutorial' in title_lower or 'how to' in title_lower:
+        factors["Improvement Recommendations"].append("💡 For tutorials: Add clear step-by-step structure and timestamps")
+    elif 'review' in title_lower:
+        factors["Improvement Recommendations"].append("💡 For reviews: Include pros/cons, rating, and comparison with alternatives")
+    elif 'gaming' in title_lower or 'game' in title_lower:
+        factors["Improvement Recommendations"].append("💡 For gaming: Focus on exciting moments and clear commentary")
+    
+    return factors
+
 def test_clean_models():
     """Test the clean models with sample videos"""
     
@@ -207,6 +367,16 @@ def test_clean_models():
             days_since_upload = 1
         views_per_day = best_prediction / days_since_upload
         print(f"📈 Views per Day: {views_per_day:,.0f}")
+        
+        # Generate detailed success factors
+        success_factors = generate_detailed_success_factors(video, predictions, best_prediction)
+        print(f"\n🔍 DETAILED SUCCESS ANALYSIS:")
+        print("-" * 50)
+        
+        for category, factors in success_factors.items():
+            print(f"\n📋 {category.upper()}:")
+            for factor in factors:
+                print(f"   {factor}")
     
     print(f"\n🎉 Clean model testing completed!")
     print(f"✅ All models are working without data leakage")
