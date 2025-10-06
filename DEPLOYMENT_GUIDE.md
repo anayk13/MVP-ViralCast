@@ -526,3 +526,4 @@ docker-compose restart backend
 ---
 
 This comprehensive deployment guide ensures successful deployment of the ViralCast website in any environment. Follow the steps carefully and monitor the application after deployment.
+
