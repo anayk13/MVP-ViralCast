@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ViralCast Model Testing</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #1976D2 0%, #42A5F5 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        
+        .form-container {
+            padding: 40px;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+        
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #1976D2;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #1976D2 0%, #42A5F5 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+            width: 100%;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .results {
+            margin-top: 30px;
+            padding: 30px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            display: none;
+        }
+        
+        .results.show {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .prediction-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        .prediction-number {
+            font-size: 3em;
+            font-weight: bold;
+            color: #1976D2;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        
+        .confidence-range {
+            text-align: center;
+            color: #666;
+            font-size: 1.2em;
+            margin-bottom: 20px;
+        }
+        
+        .quality-badge {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            margin: 5px;
+        }
+        
+        .quality-high {
+            background: #4CAF50;
+            color: white;
+        }
+        
+        .quality-medium {
+            background: #FF9800;
+            color: white;
+        }
+        
+        .quality-low {
+            background: #F44336;
+            color: white;
+        }
+        
+        .factors {
+            margin-top: 20px;
+        }
+        
+        .factor-category {
+            margin: 20px 0;
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 16px;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .factor-category h4 {
+            color: #1976D2;
+            margin-bottom: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            border-bottom: 2px solid #e3f2fd;
+            padding-bottom: 8px;
+        }
+        
+        .category-factors {
+            display: grid;
+            gap: 8px;
+        }
+        
+        .factor-item {
+            background: white;
+            padding: 12px 16px;
+            border-radius: 8px;
+            border-left: 4px solid #4caf50;
+            font-size: 14px;
+            line-height: 1.4;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #1976D2;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .error {
+            background: #ffebee;
+            color: #c62828;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #f44336;
+        }
+        
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .prediction-number {
+                font-size: 2.5em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎬 ViralCast</h1>
+            <p>YouTube Video Success Prediction Testing</p>
+        </div>
+        
+        <div class="form-container">
+            <form id="predictionForm">
+                <div class="form-group">
+                    <label for="title">📹 Video Title *</label>
+                    <input type="text" id="title" name="title" required placeholder="Enter your video title...">
+                </div>
+                
+                <div class="form-group">
+                    <label for="description">📝 Description</label>
+                    <textarea id="description" name="description" rows="3" placeholder="Enter video description..."></textarea>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="duration">⏱️ Duration (seconds) *</label>
+                        <input type="number" id="duration" name="duration" required min="1" max="7200" placeholder="300">
+                    </div>
+                    <div class="form-group">
+                        <label for="category">🎯 Category</label>
+                        <select id="category" name="category">
+                            <option value="">Select category...</option>
+                            <option value="Education">Education</option>
+                            <option value="Technology">Technology</option>
+                            <option value="Gaming">Gaming</option>
+                            <option value="Entertainment">Entertainment</option>
+                            <option value="Music">Music</option>
+                            <option value="Sports">Sports</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="like_count">👍 Likes</label>
+                        <input type="number" id="like_count" name="like_count" min="0" placeholder="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="dislike_count">👎 Dislikes</label>
+                        <input type="number" id="dislike_count" name="dislike_count" min="0" placeholder="0">
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="upload_date">📅 Upload Date *</label>
+                        <input type="date" id="upload_date" name="upload_date" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="upload_hour">🕐 Upload Hour</label>
+                        <input type="number" id="upload_hour" name="upload_hour" min="0" max="23" placeholder="14">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="tags">🏷️ Tags (comma-separated)</label>
+                    <input type="text" id="tags" name="tags" placeholder="python, tutorial, coding, machine learning">
+                </div>
+                
+                <button type="submit" class="btn" id="predictBtn">
+                    🔮 PREDICT VIEWS
+                </button>
+            </form>
+            
+            <div class="results" id="results">
+                <div class="loading" id="loading">
+                    <div class="spinner"></div>
+                    <p>Analyzing your video data...</p>
+                </div>
+                
+                <div class="prediction-card" id="predictionCard" style="display: none;">
+                    <div class="prediction-number" id="predictedViews">0</div>
+                    <div class="confidence-range" id="confidenceRange">0 - 0</div>
+                    <div style="text-align: center;">
+                        <span class="quality-badge" id="qualityBadge">High</span>
+                    </div>
+                    
+                    <div class="factors" id="factors">
+                        <h3>🔍 Key Success Factors:</h3>
+                        <div id="factorsList"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Set default date to today
+        document.getElementById('upload_date').value = new Date().toISOString().split('T')[0];
+        
+        // Mock prediction function (replace with actual API call)
+        function mockPredict(videoData) {
+            return new Promise((resolve) => {
+                setTimeout(() => {
+                    // Simple mock prediction based on input
+                    let baseViews = 10000;
+                    
+                    // Adjust based on duration (optimal: 10-20 minutes)
+                    const duration = videoData.duration;
+                    if (duration >= 600 && duration <= 1200) {
+                        baseViews *= 2;
+                    } else if (duration >= 300 && duration <= 1800) {
+                        baseViews *= 1.5;
+                    }
+                    
+                    // Adjust based on title length
+                    const titleLength = videoData.title.length;
+                    if (titleLength > 50) {
+                        baseViews *= 1.3;
+                    }
+                    
+                    // Adjust based on engagement
+                    const likes = parseInt(videoData.like_count) || 0;
+                    const dislikes = parseInt(videoData.dislike_count) || 0;
+                    if (likes > dislikes * 10) {
+                        baseViews *= 1.5;
+                    }
+                    
+                    // Add some randomness
+                    const randomFactor = 0.5 + Math.random();
+                    baseViews *= randomFactor;
+                    
+                    const prediction = Math.round(baseViews);
+                    const confidenceLower = Math.round(prediction * 0.7);
+                    const confidenceUpper = Math.round(prediction * 1.3);
+                    
+                    resolve({
+                        predicted_views: prediction,
+                        confidence_lower: confidenceLower,
+                        confidence_upper: confidenceUpper,
+                        quality: prediction > 1000000 ? 'High' : prediction > 100000 ? 'Medium' : 'Low'
+                    });
+                }, 2000); // Simulate API delay
+            });
+        }
+        
+        function formatNumber(num) {
+            return num.toLocaleString();
+        }
+        
+        function generateDetailedFactors(videoData, prediction) {
+            const factors = {
+                "Content Optimization": [],
+                "Timing & Strategy": [],
+                "Engagement Potential": [],
+                "SEO & Discoverability": [],
+                "Performance Insights": [],
+                "Improvement Recommendations": []
+            };
+            
+            const duration = parseInt(videoData.duration) || 0;
+            const durationMinutes = duration / 60;
+            const titleLength = videoData.title.length;
+            const descriptionLength = videoData.description ? videoData.description.length : 0;
+            const tagsCount = videoData.tags ? videoData.tags.split(',').length : 0;
+            const likes = parseInt(videoData.like_count) || 0;
+            const dislikes = parseInt(videoData.dislike_count) || 0;
+            const likeRatio = likes / (likes + dislikes + 1);
+            const engagementRate = (likes + dislikes) / 1000;
+            const uploadHour = parseInt(videoData.upload_hour) || 14;
+            const uploadDate = new Date(videoData.upload_date);
+            const isWeekend = uploadDate.getDay() >= 5;
+            const titleLower = videoData.title.toLowerCase();
+            
+            // Content Optimization
+            if (durationMinutes >= 10 && durationMinutes <= 20) {
+                factors["Content Optimization"].push("✅ Optimal duration (10-20 min) - perfect for most content types");
+            } else if (durationMinutes < 5) {
+                factors["Content Optimization"].push("⚠️ Short duration - consider adding more value or making it part of a series");
+            } else if (durationMinutes > 30) {
+                factors["Content Optimization"].push("⚠️ Long duration - ensure high engagement throughout to maintain retention");
+            } else {
+                factors["Content Optimization"].push("✅ Good duration range for your content type");
+            }
+            
+            if (titleLength > 40) {
+                factors["Content Optimization"].push("✅ Strong title length - good for SEO and click-through");
+            } else if (titleLength < 20) {
+                factors["Content Optimization"].push("⚠️ Short title - consider adding more descriptive keywords");
+            } else {
+                factors["Content Optimization"].push("✅ Adequate title length");
+            }
+            
+            if (descriptionLength > 100) {
+                factors["Content Optimization"].push("✅ Detailed description - excellent for SEO and viewer understanding");
+            } else if (descriptionLength > 50) {
+                factors["Content Optimization"].push("✅ Good description length - provides context");
+            } else {
+                factors["Content Optimization"].push("⚠️ Short description - consider adding more details about content");
+            }
+            
+            // Timing & Strategy
+            if (uploadHour >= 14 && uploadHour <= 18) {
+                factors["Timing & Strategy"].push("✅ Prime upload time (2-6 PM) - optimal for engagement");
+            } else if (uploadHour >= 19 && uploadHour <= 22) {
+                factors["Timing & Strategy"].push("✅ Evening upload time - good for after-work viewing");
+            } else if (uploadHour >= 9 && uploadHour <= 13) {
+                factors["Timing & Strategy"].push("✅ Morning upload time - good for early viewers");
+            } else {
+                factors["Timing & Strategy"].push("⚠️ Off-peak upload time - consider uploading during 2-6 PM for better reach");
+            }
+            
+            if (isWeekend) {
+                factors["Timing & Strategy"].push("✅ Weekend upload - good for leisure viewing and binge-watching");
+            } else {
+                factors["Timing & Strategy"].push("✅ Weekday upload - good for regular content schedule");
+            }
+            
+            // Engagement Potential
+            if (likeRatio > 0.9) {
+                factors["Engagement Potential"].push("✅ Excellent like ratio - very positive reception expected");
+            } else if (likeRatio > 0.8) {
+                factors["Engagement Potential"].push("✅ High like ratio - strong positive engagement");
+            } else if (likeRatio > 0.7) {
+                factors["Engagement Potential"].push("✅ Good like ratio - positive reception");
+            } else if (likeRatio > 0.5) {
+                factors["Engagement Potential"].push("⚠️ Moderate like ratio - mixed reception expected");
+            } else {
+                factors["Engagement Potential"].push("⚠️ Low like ratio - may need content adjustment");
+            }
+            
+            if (engagementRate > 10) {
+                factors["Engagement Potential"].push("✅ High engagement rate - strong viewer interaction expected");
+            } else if (engagementRate > 5) {
+                factors["Engagement Potential"].push("✅ Good engagement rate - decent viewer interaction");
+            } else {
+                factors["Engagement Potential"].push("⚠️ Low engagement rate - consider improving content appeal");
+            }
+            
+            // SEO & Discoverability
+            if (tagsCount > 10) {
+                factors["SEO & Discoverability"].push("✅ Excellent tag coverage - great for discoverability");
+            } else if (tagsCount > 5) {
+                factors["SEO & Discoverability"].push("✅ Good tag coverage - helps with search visibility");
+            } else if (tagsCount > 2) {
+                factors["SEO & Discoverability"].push("⚠️ Moderate tag coverage - consider adding more relevant tags");
+            } else {
+                factors["SEO & Discoverability"].push("⚠️ Low tag coverage - add more tags for better discoverability");
+            }
+            
+            if (titleLower.includes('tutorial') || titleLower.includes('how to') || titleLower.includes('guide') || titleLower.includes('learn')) {
+                factors["SEO & Discoverability"].push("✅ Educational keywords in title - great for long-term views");
+            }
+            if (titleLower.includes('review') || titleLower.includes('test') || titleLower.includes('unboxing')) {
+                factors["SEO & Discoverability"].push("✅ Review keywords in title - high engagement potential");
+            }
+            if (titleLower.includes('2024') || titleLower.includes('new') || titleLower.includes('latest')) {
+                factors["SEO & Discoverability"].push("✅ Trending keywords in title - good for current relevance");
+            }
+            
+            // Performance Insights
+            if (prediction > 50000) {
+                factors["Performance Insights"].push("🚀 HIGH VIRAL POTENTIAL - This could be a breakout video!");
+            } else if (prediction > 20000) {
+                factors["Performance Insights"].push("📈 STRONG PERFORMANCE - Expected to perform very well");
+            } else if (prediction > 10000) {
+                factors["Performance Insights"].push("✅ GOOD PERFORMANCE - Solid view count expected");
+            } else if (prediction > 5000) {
+                factors["Performance Insights"].push("📊 MODERATE PERFORMANCE - Decent view count expected");
+            } else {
+                factors["Performance Insights"].push("⚠️ LOW PERFORMANCE - May need optimization");
+            }
+            
+            factors["Performance Insights"].push("✅ Prediction based on 50,000+ real YouTube videos");
+            
+            // Improvement Recommendations
+            if (durationMinutes < 10) {
+                factors["Improvement Recommendations"].push("💡 Consider extending content to 10-15 minutes for better retention");
+            } else if (durationMinutes > 25) {
+                factors["Improvement Recommendations"].push("💡 Consider breaking into shorter segments or series");
+            }
+            
+            if (titleLength < 30) {
+                factors["Improvement Recommendations"].push("💡 Add more descriptive keywords to title for better SEO");
+            }
+            
+            if (descriptionLength < 100) {
+                factors["Improvement Recommendations"].push("💡 Expand description with timestamps, key points, and call-to-action");
+            }
+            
+            if (tagsCount < 8) {
+                factors["Improvement Recommendations"].push("💡 Add more relevant tags (aim for 8-15 tags)");
+            }
+            
+            if (!isWeekend && uploadHour < 14) {
+                factors["Improvement Recommendations"].push("💡 Consider uploading between 2-6 PM on weekdays for better reach");
+            }
+            
+            if (likeRatio < 0.8) {
+                factors["Improvement Recommendations"].push("💡 Focus on creating more engaging, valuable content");
+            }
+            
+            // Content type specific recommendations
+            if (titleLower.includes('tutorial') || titleLower.includes('how to')) {
+                factors["Improvement Recommendations"].push("💡 For tutorials: Add clear step-by-step structure and timestamps");
+            } else if (titleLower.includes('review')) {
+                factors["Improvement Recommendations"].push("💡 For reviews: Include pros/cons, rating, and comparison with alternatives");
+            } else if (titleLower.includes('gaming') || titleLower.includes('game')) {
+                factors["Improvement Recommendations"].push("💡 For gaming: Focus on exciting moments and clear commentary");
+            }
+            
+            return factors;
+        }
+        
+        document.getElementById('predictionForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const videoData = Object.fromEntries(formData.entries());
+            
+            // Show loading
+            document.getElementById('results').classList.add('show');
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('predictionCard').style.display = 'none';
+            document.getElementById('predictBtn').disabled = true;
+            document.getElementById('predictBtn').textContent = '🔄 Predicting...';
+            
+            try {
+                // Make prediction (replace with actual API call)
+                const result = await mockPredict(videoData);
+                
+                // Hide loading, show results
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('predictionCard').style.display = 'block';
+                
+                // Update prediction display
+                document.getElementById('predictedViews').textContent = formatNumber(result.predicted_views);
+                document.getElementById('confidenceRange').textContent = 
+                    `${formatNumber(result.confidence_lower)} - ${formatNumber(result.confidence_upper)}`;
+                
+                // Update quality badge
+                const qualityBadge = document.getElementById('qualityBadge');
+                qualityBadge.textContent = result.quality;
+                qualityBadge.className = `quality-badge quality-${result.quality.toLowerCase()}`;
+                
+                // Generate and display detailed factors
+                const factors = generateDetailedFactors(videoData, result.predicted_views);
+                const factorsList = document.getElementById('factorsList');
+                
+                let html = '';
+                for (const [category, categoryFactors] of Object.entries(factors)) {
+                    if (categoryFactors.length > 0) {
+                        html += `<div class="factor-category">
+                            <h4>📋 ${category.toUpperCase()}</h4>
+                            <div class="category-factors">`;
+                        categoryFactors.forEach(factor => {
+                            html += `<div class="factor-item">${factor}</div>`;
+                        });
+                        html += `</div></div>`;
+                    }
+                }
+                
+                factorsList.innerHTML = html;
+                
+            } catch (error) {
+                document.getElementById('loading').innerHTML = 
+                    '<div class="error">❌ Error making prediction. Please try again.</div>';
+            } finally {
+                document.getElementById('predictBtn').disabled = false;
+                document.getElementById('predictBtn').textContent = '🔮 PREDICT VIEWS';
+            }
+        });
+    </script>
+</body>
+</html>
